@@ -32,6 +32,10 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInMiniApp, setIsInMiniApp] = useState<boolean | null>(null)
+  const [miniAppWalletAddress, setMiniAppWalletAddress] = useState<
+    string | null
+  >(null)
+  const [walletError, setWalletError] = useState<string | null>(null)
 
   useEffect(() => {
     // Call ready() after mounting so it renders correctly as a mini-app
@@ -43,6 +47,51 @@ export default function Home() {
       console.log('Running in Farcaster mini-app:', inMiniApp)
     })
   }, [])
+
+  // Load Mini App wallet address after sign-in (only in mini-app environment)
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadMiniAppWallet() {
+      try {
+        const provider = await sdk.wallet.getEthereumProvider()
+
+        if (!provider) {
+          setWalletError('Wallet provider not available')
+          return
+        }
+
+        // Use eth_accounts (not eth_requestAccounts) to avoid prompting
+        const accounts = (await provider.request({
+          method: 'eth_accounts',
+        })) as string[]
+
+        if (!cancelled) {
+          if (accounts && accounts.length > 0) {
+            setMiniAppWalletAddress(accounts[0])
+            setWalletError(null)
+          } else {
+            setWalletError('No Mini App wallet accounts returned')
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setWalletError('Unable to load Mini App wallet')
+          // biome-ignore lint/suspicious/noConsole: Debug logging for wallet errors
+          console.error('Error loading Mini App wallet', err)
+        }
+      }
+    }
+
+    // Only load wallet if user is signed in and we're in a mini-app
+    if (parsedUser && isInMiniApp) {
+      loadMiniAppWallet()
+    }
+
+    return () => {
+      cancelled = true
+    }
+  }, [parsedUser, isInMiniApp])
 
   const handleSignIn = async () => {
     // Check if we're in a mini-app before attempting sign-in
@@ -238,9 +287,36 @@ export default function Home() {
               <span style={{ fontWeight: 500 }}>FID:</span> {parsedUser.fid}
             </p>
           )}
+
+          {miniAppWalletAddress && (
+            <p style={{ fontSize: '14px', marginTop: '8px' }}>
+              <span style={{ fontWeight: 500 }}>Mini App Wallet:</span>
+              <br />
+              <span style={{ fontFamily: 'monospace', fontSize: '12px' }}>
+                {miniAppWalletAddress.slice(0, 6)}…
+                {miniAppWalletAddress.slice(-4)}
+              </span>
+            </p>
+          )}
+
+          {walletError && (
+            <p style={{ fontSize: '12px', marginTop: '8px', color: '#dc2626' }}>
+              {walletError}
+            </p>
+          )}
+
           {parsedUser.address && (
-            <p style={{ fontSize: '14px', marginTop: '4px' }}>
-              <span style={{ fontWeight: 500 }}>Wallet:</span>{' '}
+            <p
+              style={{
+                fontSize: '12px',
+                marginTop: '12px',
+                color: '#6b7280',
+              }}
+            >
+              <span style={{ fontWeight: 500 }}>
+                Auth signer address (SIWF):
+              </span>
+              <br />
               <span style={{ fontFamily: 'monospace' }}>
                 {parsedUser.address.slice(0, 6)}…{parsedUser.address.slice(-4)}
               </span>
