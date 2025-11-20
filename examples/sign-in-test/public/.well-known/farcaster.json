@@ -1,0 +1,18 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjIwOTY1LCJ0eXBlIjoiY3VzdG9keSIsImtleSI6IjB4RjA0NjJGZGI0MUVCMDM3Q2ExODQzOTFENjc0YjlDMUYxMWJkMTRBMiJ9",
+    "payload": "eyJkb21haW4iOiJtaW5pYXBwcy12aXJpZC52ZXJjZWwuYXBwIn0",
+    "signature": "cYKF09pULMIgjcA2hLXSCVyYBGh/ucYUm7vIwdIczEt2BzsiCLcLcxzO6BmOfLd3f5gVeP89lclDd/ilo0oZcxw="
+  },
+  "frame": {
+    "version": "1",
+    "name": "Example Frame",
+    "iconUrl": "https://miniapps-virid.vercel.app/icon.png",
+    "homeUrl": "https://miniapps-virid.vercel.app",
+    "imageUrl": "https://miniapps-virid.vercel.app/image.png",
+    "buttonTitle": "Check this out",
+    "splashImageUrl": "https://miniapps-virid.vercel.app/splash.png",
+    "splashBackgroundColor": "#eeccff",
+    "webhookUrl": "https://miniapps-virid.vercel.app/api/webhook"
+  }
+}
