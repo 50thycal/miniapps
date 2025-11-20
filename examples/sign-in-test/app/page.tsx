@@ -2,6 +2,7 @@
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { useEffect, useState } from 'react'
+import { NeynarMePanel } from '../components/NeynarMePanel.tsx'
 import { TestTransactionPanel } from '../components/TestTransactionPanel.tsx'
 
 type SignInResult = {
@@ -346,6 +347,10 @@ export default function Home() {
       )}
 
       {parsedUser && isInMiniApp && <TestTransactionPanel />}
+
+      {parsedUser?.fid && (
+        <NeynarMePanel fid={Number.parseInt(parsedUser.fid, 10)} />
+      )}
     </main>
   )
 }
