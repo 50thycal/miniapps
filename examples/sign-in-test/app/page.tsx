@@ -9,9 +9,14 @@ type SignInResult = {
   authMethod: 'custody' | 'authAddress'
 }
 
+type ParsedUser = {
+  fid?: string
+  address?: string
+}
+
 export default function Home() {
-  const [isSignedIn, setIsSignedIn] = useState(false)
-  const [signInData, setSignInData] = useState<SignInResult | null>(null)
+  const [parsedUser, setParsedUser] = useState<ParsedUser | null>(null)
+  const [signInResult, setSignInResult] = useState<SignInResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [isInMiniApp, setIsInMiniApp] = useState<boolean | null>(null)
@@ -40,8 +45,11 @@ export default function Home() {
       setIsLoading(true)
       setError(null)
 
-      // Generate a random nonce
-      const nonce = Math.random().toString(36).substring(2, 15)
+      // Generate a random nonce using crypto.randomUUID() or fallback
+      const nonce =
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : Math.random().toString(36).substring(2, 15)
 
       // Call signIn with the required parameters
       const result = await sdk.actions.signIn({
@@ -64,8 +72,21 @@ export default function Home() {
         return
       }
 
-      setSignInData(result)
-      setIsSignedIn(true)
+      // Parse FID from "farcaster://fid/12345"
+      const fidMatch = result.message.match(/farcaster:\/\/fid\/(\d+)/)
+      const fid = fidMatch?.[1]
+
+      // Parse Ethereum address - it appears after "account:" or on second line
+      // Try "account: 0x..." format first
+      let addressMatch = result.message.match(/account:\s*(0x[a-fA-F0-9]{40})/)
+      if (!addressMatch) {
+        // Fallback: look for any 0x... address (typically on line 2)
+        addressMatch = result.message.match(/^(0x[a-fA-F0-9]{40})\s*$/m)
+      }
+      const address = addressMatch?.[1]
+
+      setSignInResult(result)
+      setParsedUser({ fid, address })
     } catch (err) {
       // biome-ignore lint/suspicious/noConsole: Debug logging for sign-in errors
       console.error('Sign-in error:', err)
@@ -79,84 +100,35 @@ export default function Home() {
     }
   }
 
-  if (isSignedIn && signInData) {
-    return (
-      <div>
-        <h1>✅ Signed In</h1>
-        <div style={{ marginTop: '20px' }}>
-          <h2>Sign-In Details:</h2>
-          <div
-            style={{
-              backgroundColor: '#f5f5f5',
-              padding: '15px',
-              borderRadius: '8px',
-              marginTop: '10px',
-              wordBreak: 'break-all',
-            }}
-          >
-            <div style={{ marginBottom: '15px' }}>
-              <strong>Auth Method:</strong>
-              <div style={{ marginTop: '5px' }}>{signInData.authMethod}</div>
-            </div>
-            <div style={{ marginBottom: '15px' }}>
-              <strong>Message:</strong>
-              <div
-                style={{
-                  marginTop: '5px',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  backgroundColor: 'white',
-                  padding: '10px',
-                  borderRadius: '4px',
-                }}
-              >
-                {signInData.message}
-              </div>
-            </div>
-            <div>
-              <strong>Signature:</strong>
-              <div
-                style={{
-                  marginTop: '5px',
-                  fontFamily: 'monospace',
-                  fontSize: '12px',
-                  backgroundColor: 'white',
-                  padding: '10px',
-                  borderRadius: '4px',
-                }}
-              >
-                {signInData.signature}
-              </div>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              setIsSignedIn(false)
-              setSignInData(null)
-            }}
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#6366f1',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer',
-            }}
-          >
-            Sign In Again
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
-    <div style={{ maxWidth: '600px' }}>
-      <h1>Sign In with Farcaster</h1>
-      <p style={{ color: '#666', marginBottom: '30px' }}>
+    <main
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '32px 16px',
+      }}
+    >
+      <h1
+        style={{
+          fontSize: '30px',
+          fontWeight: 'bold',
+          marginBottom: '8px',
+          textAlign: 'center',
+        }}
+      >
+        Sign In with Farcaster
+      </h1>
+      <p
+        style={{
+          color: '#6b7280',
+          marginBottom: '24px',
+          textAlign: 'center',
+          maxWidth: '28rem',
+        }}
+      >
         Click the button below to sign in with your Farcaster account.
       </p>
 
@@ -169,6 +141,7 @@ export default function Home() {
             color: '#92400e',
             borderRadius: '8px',
             border: '1px solid #fbbf24',
+            maxWidth: '28rem',
           }}
         >
           <strong>ℹ️ Not in Mini-App:</strong> This app needs to be opened from
@@ -181,14 +154,14 @@ export default function Home() {
         onClick={handleSignIn}
         disabled={isLoading || isInMiniApp === null}
         style={{
-          padding: '12px 24px',
-          fontSize: '16px',
-          fontWeight: 600,
+          borderRadius: '9999px',
           backgroundColor:
-            isLoading || isInMiniApp === null ? '#ccc' : '#8b5cf6',
+            isLoading || isInMiniApp === null ? '#9ca3af' : '#8b5cf6',
           color: 'white',
+          padding: '12px 24px',
+          fontWeight: 600,
+          boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
           border: 'none',
-          borderRadius: '8px',
           cursor: isLoading || isInMiniApp === null ? 'not-allowed' : 'pointer',
           transition: 'background-color 0.2s',
         }}
@@ -205,25 +178,86 @@ export default function Home() {
       >
         {isLoading
           ? 'Signing in...'
-          : isInMiniApp === null
-            ? 'Checking environment...'
-            : 'Sign in with Farcaster'}
+          : parsedUser
+            ? 'Signed in – Sign in again'
+            : isInMiniApp === null
+              ? 'Checking environment...'
+              : 'Sign in with Farcaster'}
       </button>
 
       {error && (
         <div
           style={{
-            marginTop: '20px',
-            padding: '12px',
+            marginTop: '16px',
+            borderRadius: '6px',
             backgroundColor: '#fee2e2',
-            color: '#dc2626',
-            borderRadius: '8px',
-            border: '1px solid #fca5a5',
+            color: '#991b1b',
+            padding: '16px',
+            fontSize: '14px',
+            maxWidth: '28rem',
           }}
         >
           <strong>Error:</strong> {error}
         </div>
       )}
-    </div>
+
+      {parsedUser && (
+        <div
+          style={{
+            marginTop: '24px',
+            width: '100%',
+            maxWidth: '28rem',
+            borderRadius: '12px',
+            border: '1px solid #e5e7eb',
+            backgroundColor: 'white',
+            padding: '16px',
+            boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+          }}
+        >
+          <h2
+            style={{
+              fontSize: '18px',
+              fontWeight: 600,
+              marginBottom: '8px',
+            }}
+          >
+            Signed in as
+          </h2>
+          {parsedUser.fid && (
+            <p style={{ fontSize: '14px', marginBottom: '4px' }}>
+              <span style={{ fontWeight: 500 }}>FID:</span> {parsedUser.fid}
+            </p>
+          )}
+          {parsedUser.address && (
+            <p style={{ fontSize: '14px', marginTop: '4px' }}>
+              <span style={{ fontWeight: 500 }}>Wallet:</span>{' '}
+              <span style={{ fontFamily: 'monospace' }}>
+                {parsedUser.address.slice(0, 6)}…{parsedUser.address.slice(-4)}
+              </span>
+            </p>
+          )}
+
+          {signInResult && (
+            <details
+              style={{ marginTop: '12px', fontSize: '12px', color: '#6b7280' }}
+            >
+              <summary style={{ cursor: 'pointer' }}>
+                View raw sign-in message
+              </summary>
+              <pre
+                style={{
+                  marginTop: '8px',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  fontSize: '11px',
+                }}
+              >
+                {signInResult.message}
+              </pre>
+            </details>
+          )}
+        </div>
+      )}
+    </main>
   )
 }
