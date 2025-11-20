@@ -2,8 +2,11 @@
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { useEffect, useState } from 'react'
+import { DebugPanel } from '../components/DebugPanel.tsx'
 import { NeynarMePanel } from '../components/NeynarMePanel.tsx'
 import { TestTransactionPanel } from '../components/TestTransactionPanel.tsx'
+
+const APP_VERSION = '0.1.0'
 
 type SignInResult = {
   signature: string
@@ -350,6 +353,13 @@ export default function Home() {
 
       {parsedUser?.fid && (
         <NeynarMePanel fid={Number.parseInt(parsedUser.fid, 10)} />
+      )}
+
+      {parsedUser?.fid && (
+        <DebugPanel
+          fid={Number.parseInt(parsedUser.fid, 10)}
+          appVersion={APP_VERSION}
+        />
       )}
     </main>
   )
