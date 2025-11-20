@@ -14,6 +14,17 @@ type ParsedUser = {
   address?: string
 }
 
+function generateNonce(length = 16): string {
+  const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+  let result = ''
+  const array = new Uint8Array(length)
+  crypto.getRandomValues(array)
+  for (let i = 0; i < length; i++) {
+    result += chars[array[i] % chars.length]
+  }
+  return result
+}
+
 export default function Home() {
   const [parsedUser, setParsedUser] = useState<ParsedUser | null>(null)
   const [signInResult, setSignInResult] = useState<SignInResult | null>(null)
@@ -45,11 +56,9 @@ export default function Home() {
       setIsLoading(true)
       setError(null)
 
-      // Generate a random nonce using crypto.randomUUID() or fallback
-      const nonce =
-        typeof crypto !== 'undefined' && crypto.randomUUID
-          ? crypto.randomUUID()
-          : Math.random().toString(36).substring(2, 15)
+      // Generate a random alphanumeric nonce (required by SIWF validation)
+      // Must be at least 8 characters and contain only [a-zA-Z0-9]
+      const nonce = generateNonce(16)
 
       // Call signIn with the required parameters
       const result = await sdk.actions.signIn({
