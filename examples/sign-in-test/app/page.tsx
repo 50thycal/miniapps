@@ -2,6 +2,7 @@
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { useEffect, useState } from 'react'
+import { TestTransactionPanel } from '../components/TestTransactionPanel.tsx'
 
 type SignInResult = {
   signature: string
@@ -267,6 +268,8 @@ export default function Home() {
           )}
         </div>
       )}
+
+      {parsedUser && isInMiniApp && <TestTransactionPanel />}
     </main>
   )
 }
