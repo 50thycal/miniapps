@@ -67,6 +67,8 @@ export function NeynarProfileCard({ fid }: Props) {
     return null
   }
 
+  // TODO(app): Extend this to use Neynar for more data (reactions, followers, channels, etc.).
+  // See the Neynar SDK documentation for available endpoints: https://docs.neynar.com
   return (
     <section
       style={{

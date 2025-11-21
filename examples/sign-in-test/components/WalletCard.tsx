@@ -84,6 +84,8 @@ export function WalletCard({ fid }: Props) {
             </div>
           )}
 
+          {/* TODO(app): Replace this test transaction with your own game/action transaction logic. */}
+          {/* See useMiniAppWallet.ts for how to send custom transactions with the mini app wallet. */}
           <button
             type="button"
             onClick={handleSendTestTx}
