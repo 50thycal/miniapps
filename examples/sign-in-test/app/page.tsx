@@ -2,11 +2,8 @@
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { useEffect, useState } from 'react'
-import { DebugPanel } from '../components/DebugPanel.tsx'
 import { NeynarMePanel } from '../components/NeynarMePanel.tsx'
 import { TestTransactionPanel } from '../components/TestTransactionPanel.tsx'
-
-const APP_VERSION = '0.1.0'
 
 type SignInResult = {
   signature: string
@@ -30,12 +27,7 @@ function generateNonce(length = 16): string {
   return result
 }
 
-type HomeProps = {
-  forceDebug?: boolean
-}
-
-export default function Home({ forceDebug = false }: HomeProps = {}) {
-  const [isDebugMode, setIsDebugMode] = useState(forceDebug)
+export default function Home() {
   const [parsedUser, setParsedUser] = useState<ParsedUser | null>(null)
   const [signInResult, setSignInResult] = useState<SignInResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -45,16 +37,6 @@ export default function Home({ forceDebug = false }: HomeProps = {}) {
     string | null
   >(null)
   const [walletError, setWalletError] = useState<string | null>(null)
-
-  useEffect(() => {
-    // Check for ?debug=1 query param on client-side
-    if (forceDebug) {
-      setIsDebugMode(true)
-    } else {
-      const params = new URLSearchParams(window.location.search)
-      setIsDebugMode(params.get('debug') === '1')
-    }
-  }, [forceDebug])
 
   useEffect(() => {
     // Call ready() after mounting so it renders correctly as a mini-app
@@ -362,14 +344,6 @@ export default function Home({ forceDebug = false }: HomeProps = {}) {
             </details>
           )}
         </div>
-      )}
-
-      {parsedUser?.fid && isDebugMode && (
-        <DebugPanel
-          fid={Number.parseInt(parsedUser.fid, 10)}
-          appVersion={APP_VERSION}
-          isMiniApp={isInMiniApp ?? undefined}
-        />
       )}
 
       {parsedUser && isInMiniApp && <TestTransactionPanel />}
