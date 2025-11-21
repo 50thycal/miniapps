@@ -1,32 +1,15 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { useDebugInfo } from '../hooks/useDebugInfo.ts'
 
 type Props = {
   fid: number
   appVersion: string
-  forceDebug?: boolean
+  isMiniApp?: boolean
 }
 
-export function DebugPanel({ fid, appVersion, forceDebug = false }: Props) {
-  const [debugEnabled, setDebugEnabled] = useState(forceDebug)
-
-  useEffect(() => {
-    // If forceDebug is true, always enable debug mode
-    if (forceDebug) {
-      setDebugEnabled(true)
-      return
-    }
-
-    // Otherwise check for ?debug=1 query param on client-side
-    const params = new URLSearchParams(window.location.search)
-    setDebugEnabled(params.get('debug') === '1')
-  }, [forceDebug])
-
-  const { status, data, error } = useDebugInfo(debugEnabled)
-
-  if (!debugEnabled) return null
+export function DebugPanel({ fid, appVersion, isMiniApp }: Props) {
+  const { status, data, error } = useDebugInfo(true)
 
   return (
     <section
@@ -46,22 +29,31 @@ export function DebugPanel({ fid, appVersion, forceDebug = false }: Props) {
       </h2>
 
       <div style={{ fontSize: '14px', marginBottom: '8px' }}>
+        <strong>FID:</strong> {fid}
+      </div>
+
+      <div style={{ fontSize: '14px', marginBottom: '8px' }}>
         <strong>App version:</strong> {appVersion}
       </div>
 
       <div style={{ fontSize: '14px', marginBottom: '8px' }}>
-        <strong>FID:</strong> {fid}
+        <strong>Is Mini App:</strong>{' '}
+        {typeof isMiniApp === 'boolean'
+          ? isMiniApp
+            ? 'yes'
+            : 'no'
+          : 'unknown'}
       </div>
 
       {status === 'loading' && (
         <div style={{ fontSize: '14px', color: '#6b7280' }}>
-          Loading environment info…
+          Loading additional environment info…
         </div>
       )}
 
       {status === 'error' && (
         <div style={{ fontSize: '14px', color: '#dc2626' }}>
-          <strong>Error:</strong> {error}
+          <strong>Error loading additional data:</strong> {error}
         </div>
       )}
 
@@ -74,10 +66,6 @@ export function DebugPanel({ fid, appVersion, forceDebug = false }: Props) {
             gap: '8px',
           }}
         >
-          <div>
-            <strong>Is Mini App:</strong> {data.isMiniApp ? 'yes' : 'no'}
-          </div>
-
           {data.chains && data.chains.length > 0 && (
             <div>
               <strong>Chains:</strong>

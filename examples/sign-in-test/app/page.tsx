@@ -35,6 +35,7 @@ type HomeProps = {
 }
 
 export default function Home({ forceDebug = false }: HomeProps = {}) {
+  const [isDebugMode, setIsDebugMode] = useState(forceDebug)
   const [parsedUser, setParsedUser] = useState<ParsedUser | null>(null)
   const [signInResult, setSignInResult] = useState<SignInResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -44,6 +45,16 @@ export default function Home({ forceDebug = false }: HomeProps = {}) {
     string | null
   >(null)
   const [walletError, setWalletError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Check for ?debug=1 query param on client-side
+    if (forceDebug) {
+      setIsDebugMode(true)
+    } else {
+      const params = new URLSearchParams(window.location.search)
+      setIsDebugMode(params.get('debug') === '1')
+    }
+  }, [forceDebug])
 
   useEffect(() => {
     // Call ready() after mounting so it renders correctly as a mini-app
@@ -353,11 +364,11 @@ export default function Home({ forceDebug = false }: HomeProps = {}) {
         </div>
       )}
 
-      {parsedUser?.fid && (
+      {parsedUser?.fid && isDebugMode && (
         <DebugPanel
           fid={Number.parseInt(parsedUser.fid, 10)}
           appVersion={APP_VERSION}
-          forceDebug={forceDebug}
+          isMiniApp={isInMiniApp ?? undefined}
         />
       )}
 
