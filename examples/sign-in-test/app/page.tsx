@@ -2,55 +2,11 @@
 
 import { sdk } from '@farcaster/miniapp-sdk'
 import { useEffect, useState } from 'react'
+import { DebugPanel } from '../components/DebugPanel.tsx'
 import { NeynarMePanel } from '../components/NeynarMePanel.tsx'
 import { TestTransactionPanel } from '../components/TestTransactionPanel.tsx'
 
 const APP_VERSION = '0.1.0'
-
-function DebugCard(props: {
-  fid: number | string
-  appVersion: string
-  isMiniApp?: boolean
-}) {
-  if (!props.fid) return null
-
-  return (
-    <section
-      style={{
-        marginTop: '16px',
-        width: '100%',
-        maxWidth: '28rem',
-        borderRadius: '12px',
-        border: '1px solid #e5e7eb',
-        backgroundColor: '#f8fafc',
-        padding: '12px',
-        boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-      }}
-    >
-      <h2
-        style={{
-          fontSize: '14px',
-          fontWeight: 600,
-          marginBottom: '8px',
-        }}
-      >
-        Debug
-      </h2>
-      <div style={{ fontSize: '12px', marginBottom: '4px' }}>
-        <span style={{ fontWeight: 500 }}>FID:</span> {props.fid}
-      </div>
-      <div style={{ fontSize: '12px', marginBottom: '4px' }}>
-        <span style={{ fontWeight: 500 }}>App version:</span> {props.appVersion}
-      </div>
-      {typeof props.isMiniApp === 'boolean' && (
-        <div style={{ fontSize: '12px' }}>
-          <span style={{ fontWeight: 500 }}>Is Mini App:</span>{' '}
-          {props.isMiniApp ? 'yes' : 'no'}
-        </div>
-      )}
-    </section>
-  )
-}
 
 type SignInResult = {
   signature: string
@@ -394,10 +350,9 @@ export default function Home() {
       )}
 
       {parsedUser?.fid && (
-        <DebugCard
-          fid={parsedUser.fid}
+        <DebugPanel
+          fid={Number.parseInt(parsedUser.fid, 10)}
           appVersion={APP_VERSION}
-          isMiniApp={isInMiniApp ?? undefined}
         />
       )}
 
