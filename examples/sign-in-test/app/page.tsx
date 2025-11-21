@@ -4,6 +4,7 @@ import { AuthCard } from '../components/AuthCard.tsx'
 import { NeynarProfileCard } from '../components/NeynarProfileCard.tsx'
 import { WalletCard } from '../components/WalletCard.tsx'
 import { useAuthSession } from '../hooks/useAuthSession.ts'
+import { APP_CONFIG } from './config.ts'
 
 export default function Home() {
   const { status, user, error, isInMiniApp, signIn } = useAuthSession()
@@ -39,10 +40,10 @@ export default function Home() {
               marginBottom: '8px',
             }}
           >
-            Farcaster Mini App Starter
+            {APP_CONFIG.title}
           </h1>
           <p style={{ color: '#6b7280', fontSize: '14px' }}>
-            A complete template with auth, wallet, and profile integration
+            {APP_CONFIG.description}
           </p>
         </div>
 
@@ -56,6 +57,8 @@ export default function Home() {
 
         {fid && isInMiniApp && (
           <>
+            {/* TODO(app): Add your mini app's main UI here. This section renders after sign-in. */}
+            {/* The WalletCard and NeynarProfileCard below are starter examples you can keep, modify, or remove. */}
             <WalletCard fid={fid} />
             <NeynarProfileCard fid={fid} />
           </>

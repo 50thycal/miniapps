@@ -1,8 +1,9 @@
 import type { Metadata } from 'next'
+import { APP_CONFIG } from './config.ts'
 
 export const metadata: Metadata = {
-  title: 'Sign In Test - Farcaster Mini App',
-  description: 'Example mini-app demonstrating sign-in functionality',
+  title: APP_CONFIG.title,
+  description: APP_CONFIG.description,
   other: {
     'fc:miniapp': JSON.stringify({
       version: '1',
