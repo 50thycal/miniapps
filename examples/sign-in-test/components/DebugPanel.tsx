@@ -6,16 +6,23 @@ import { useDebugInfo } from '../hooks/useDebugInfo.ts'
 type Props = {
   fid: number
   appVersion: string
+  forceDebug?: boolean
 }
 
-export function DebugPanel({ fid, appVersion }: Props) {
-  const [debugEnabled, setDebugEnabled] = useState(false)
+export function DebugPanel({ fid, appVersion, forceDebug = false }: Props) {
+  const [debugEnabled, setDebugEnabled] = useState(forceDebug)
 
   useEffect(() => {
-    // Check for ?debug=1 query param on client-side
+    // If forceDebug is true, always enable debug mode
+    if (forceDebug) {
+      setDebugEnabled(true)
+      return
+    }
+
+    // Otherwise check for ?debug=1 query param on client-side
     const params = new URLSearchParams(window.location.search)
     setDebugEnabled(params.get('debug') === '1')
-  }, [])
+  }, [forceDebug])
 
   const { status, data, error } = useDebugInfo(debugEnabled)
 

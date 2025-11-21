@@ -30,7 +30,11 @@ function generateNonce(length = 16): string {
   return result
 }
 
-export default function Home() {
+type HomeProps = {
+  forceDebug?: boolean
+}
+
+export default function Home({ forceDebug = false }: HomeProps = {}) {
   const [parsedUser, setParsedUser] = useState<ParsedUser | null>(null)
   const [signInResult, setSignInResult] = useState<SignInResult | null>(null)
   const [isLoading, setIsLoading] = useState(false)
@@ -353,6 +357,7 @@ export default function Home() {
         <DebugPanel
           fid={Number.parseInt(parsedUser.fid, 10)}
           appVersion={APP_VERSION}
+          forceDebug={forceDebug}
         />
       )}
 
