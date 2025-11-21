@@ -1,10 +1,22 @@
 'use client'
 
-import { useAuthSession } from '../hooks/useAuthSession.ts'
+import type { AuthUser } from '../hooks/useAuthSession.ts'
 
-export function AuthCard() {
-  const { status, user, error, isInMiniApp, signIn } = useAuthSession()
+type Props = {
+  status: 'loading' | 'signedOut' | 'signedIn'
+  user: AuthUser | null
+  error: string | null
+  isInMiniApp: boolean
+  onSignIn: () => void
+}
 
+export function AuthCard({
+  status,
+  user,
+  error,
+  isInMiniApp,
+  onSignIn,
+}: Props) {
   if (!isInMiniApp) {
     return (
       <section
@@ -91,7 +103,7 @@ export function AuthCard() {
     >
       <button
         type="button"
-        onClick={signIn}
+        onClick={onSignIn}
         disabled={status === 'loading'}
         style={{
           borderRadius: '9999px',
