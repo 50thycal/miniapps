@@ -1,6 +1,6 @@
 'use client'
 
-import { useSearchParams } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import { useDebugInfo } from '../hooks/useDebugInfo.ts'
 
 type Props = {
@@ -9,8 +9,13 @@ type Props = {
 }
 
 export function DebugPanel({ fid, appVersion }: Props) {
-  const searchParams = useSearchParams()
-  const debugEnabled = searchParams?.get('debug') === '1'
+  const [debugEnabled, setDebugEnabled] = useState(false)
+
+  useEffect(() => {
+    // Check for ?debug=1 query param on client-side
+    const params = new URLSearchParams(window.location.search)
+    setDebugEnabled(params.get('debug') === '1')
+  }, [])
 
   const { status, data, error } = useDebugInfo(debugEnabled)
 
