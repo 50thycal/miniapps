@@ -6,7 +6,7 @@ import { WalletCard } from '../components/WalletCard.tsx'
 import { useAuthSession } from '../hooks/useAuthSession.ts'
 
 export default function Home() {
-  const { status, user } = useAuthSession()
+  const { status, user, error, isInMiniApp, signIn } = useAuthSession()
 
   const fid = user?.fid
 
@@ -46,16 +46,22 @@ export default function Home() {
           </p>
         </div>
 
-        <AuthCard />
+        <AuthCard
+          status={status}
+          user={user}
+          error={error}
+          isInMiniApp={isInMiniApp}
+          onSignIn={signIn}
+        />
 
-        {fid && (
+        {fid && isInMiniApp && (
           <>
             <WalletCard fid={fid} />
             <NeynarProfileCard fid={fid} />
           </>
         )}
 
-        {!fid && status === 'signedOut' && (
+        {!fid && status === 'signedOut' && isInMiniApp && (
           <p
             style={{
               fontSize: '14px',
