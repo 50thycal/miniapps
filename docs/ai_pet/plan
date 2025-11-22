@@ -1,0 +1,173 @@
+# AI Pet Farcaster Mini-App — Development Plan (v0.2)
+
+This document outlines the phased development plan for the **AI Pet Farcaster Mini-App**, following the Build Whenever workflow.
+
+---
+
+## IMPORTANT — Template Usage Requirements
+
+This project **must use the existing Farcaster Mini-App Starter Template** included in the repository.
+
+The base skeleton is located in:
+
+```
+examples/sign-in-test
+```
+
+Claude MUST follow these rules:
+
+- Copy `examples/sign-in-test` → `examples/ai-pet`
+- Reuse the template’s folder and file structure
+- Follow the established patterns for:
+  - QuickAuth flow
+  - Wallet connection (warplet)
+  - Backend API route structure
+  - UI layout components
+  - Fetch helpers
+  - `TODO(app)` extension points
+- **Do NOT introduce new architectural patterns** unless explicitly required by SPEC.md
+- Maintain full consistency with the template so all Farcaster mini-apps behave the same way
+
+This ensures a predictable development workflow and unified architecture across all mini-apps in the ecosystem.
+
+---
+
+## Phase 0 — Repo + Environment Setup
+
+**Goal:** Prepare the project for development.
+
+**Steps:**
+- Copy `examples/sign-in-test` → `examples/ai-pet`
+- Add `.env` placeholders:
+  - `NEYNAR_API_KEY`
+  - `OPENAI_API_KEY`
+  - `APP_BACKEND_URL`
+- Confirm the mini-app boots and QuickAuth works in the new example.
+
+**Outcome:**  
+Functional `examples/ai-pet` environment ready for feature development.
+
+---
+
+## Phase 1 — Core Mini-App UX (Chat + Basic State)
+
+**Goal:** Implement the private chat flow inside the mini-app.
+
+**Frontend:**
+- Chat screen UI with:
+  - User/AI message bubbles
+  - Input box
+  - Loading states
+
+**Backend:**
+- `/api/chat`:
+  - Input: `user_fid`, `message`
+  - Calls OpenAI with default persona
+  - Returns AI response
+
+**Outcome:**  
+User can log in and chat with the AI (no public profile yet).
+
+---
+
+## Phase 2 — AI Profile Creation (Mint FID + Signer via Neynar)
+
+**Goal:** Let users create a **public AI identity**.
+
+**Backend:**
+- `/api/create-ai-profile`:
+  - Mint new FID via Neynar
+  - Attach managed signer
+  - Configure username, avatar, etc.
+- `/api/get-ai-profile`
+
+**Frontend:**
+- Create Profile screen:
+  - “Make my AI public” CTA
+  - Optional username form
+  - Success state with Warpcast link
+
+**Outcome:**  
+User owns a persistent AI identity with its own FID + signer.
+
+---
+
+## Phase 3 — Personality & Settings
+
+**Goal:** Users configure how the AI behaves & posts.
+
+**Backend:**
+- `/api/update-settings`
+- Update `/api/chat` to include personality in system prompt
+
+**Frontend:**
+- Settings screen for:
+  - Tone (wholesome/snarky/chaotic/etc.)
+  - Allowed topics
+  - Posting frequency
+  - Autonomy toggle (UI only until Phase 4)
+
+**Outcome:**  
+Settings stored in DB and reflected in chat behavior.
+
+---
+
+## Phase 4 — Autonomous Posting Engine
+
+**Goal:** AI posts autonomously from its own FID.
+
+**Backend:**
+- Worker/cron:
+  - Runs every 3–5 minutes
+  - Fetches AI profiles with autonomy enabled
+  - Checks quotas
+  - Generates cast text (OpenAI)
+  - Safety filtering
+  - Posts via Neynar
+  - Writes to `posts_log`
+
+- `GET /api/get-last-casts`
+
+**Frontend:**
+- Autonomy toggle activates behavior
+- ActivityLog screen:
+  - Display recent casts via `get-last-casts`
+
+**Outcome:**  
+AI autonomously posts on its Farcaster feed.
+
+---
+
+## Phase 5 — Polish, Safety, Ship V1
+
+**Goal:** Finalize UX, guardrails, and presentation.
+
+**Tasks:**
+- Improve microcopy
+- Add banned-word filter, link rules, rate limits
+- Visual polish (avatar, handle, message styling)
+- Add lightweight analytics
+
+**Outcome:**  
+A clean, demo-ready V1 product.
+
+---
+
+## Claude PR Summary
+
+PRs should follow phases:
+
+- **PR 1:** Example copy + base chat UI  
+- **PR 2:** `/api/chat` + OpenAI  
+- **PR 3:** Postgres schema migrations  
+- **PR 4:** Profile creation endpoints  
+- **PR 5:** Profile creation UI  
+- **PR 6:** Settings backend  
+- **PR 7:** Settings UI  
+- **PR 8:** Autonomous posting worker  
+- **PR 9:** ActivityLog screen  
+- **PR 10+:** Polish + safety  
+
+---
+
+**End of Plan v0.2**
