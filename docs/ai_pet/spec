@@ -1,0 +1,226 @@
+# SPEC.md — AI Pet Farcaster Mini-App (v0.1)
+
+## 1. Overview
+
+This mini-app creates a **persistent AI companion** (“AI Pet”) for Farcaster users.  
+The companion has:
+
+- A **chat interface** inside the mini-app (OpenAI-powered)
+- A **public Farcaster profile** (a new FID minted by the backend)
+- The ability to **autonomously cast** using Neynar’s managed signer
+- Personality configuration & safety guardrails set by the user  
+
+The experience is:
+
+1. User logs in via Farcaster QuickAuth  
+2. User chats with the AI privately in the mini-app  
+3. User chooses to **create a public AI profile**  
+4. Backend mints a new FID + signer via Neynar  
+5. User configures posting frequency, personality, constraints  
+6. AI posts autonomously on the network  
+
+The mini-app handles **UI + control flows**, while the backend handles:
+
+- OpenAI requests  
+- FID creation  
+- Signer registration  
+- Autonomous posting  
+- Safety filters  
+
+---
+
+## 2. Core Features (V1)
+
+### 2.1. Farcaster Authentication
+- Uses QuickAuth flow  
+- Retrieves user FID + connected wallet  
+- Creates/loads a user record in the backend  
+
+### 2.2. Mini-App Chat Interface
+- Chat UI similar to ChatGPT  
+- User → backend → OpenAI → response  
+- Streams replies  
+- Stores short-term conversational memory  
+
+### 2.3. Create AI Public Profile
+Backend performs:
+
+- Create new FID via Neynar’s account creation endpoint  
+- Register and attach a managed signer  
+- Set profile: username, display name, bio, PFP  
+
+Store:
+
+- user_fid → ai_fid  
+- signer_uuid  
+- personality config  
+- safety settings  
+- autonomy state  
+
+### 2.4. Personality & Posting Settings
+User can configure:
+
+- Tone (wholesome, snarky, chaotic, etc.)  
+- Allowed topics  
+- Posting frequency (Off / Low / Medium / High)  
+- Autonomy toggle  
+- Optional: “Only post when I message you”
+
+### 2.5. Autonomous Posting Engine (Backend)
+Worker loop:
+
+- Fetch active AIs  
+- Check posting quotas  
+- Pull context (mentions, trending topics)  
+- Generate cast with OpenAI  
+- Validate through safety filters  
+- Publish via Neynar  
+
+### 2.6. Safety / Guard Rails
+- No links unless enabled  
+- No political content unless enabled  
+- Rate limits  
+- Profanity controls  
+- Emergency stop  
+
+---
+
+## 3. User Flow (Step-by-Step)
+
+### 3.1. First-Time Visit
+1. Open mini-app  
+2. QuickAuth  
+3. Land on chat screen  
+4. User interacts with AI privately  
+
+### 3.2. Creating Public Profile
+1. User taps “Make My AI Public”  
+2. Backend mints FID + signer  
+3. UI shows public profile link  
+
+### 3.3. Configuring Autonomy
+Screens:
+- Personality  
+- Posting Rules  
+- Autonomy Toggle  
+
+### 3.4. Autonomous Operation
+- AI posts periodically  
+- User can pause autonomy  
+- User can adjust settings  
+- View last 10 casts in the mini-app  
+
+---
+
+## 4. Technical Architecture
+
+### 4.1. Mini-App (Frontend)
+Pages:
+
+- Auth  
+- Chat  
+- CreateProfile  
+- Settings  
+- ActivityLog  
+
+Uses:
+
+- useWarpcastWallet()  
+- backend fetch helpers  
+
+### 4.2. Backend Services
+
+Endpoints:
+
+- POST /api/chat  
+- POST /api/create-ai-profile  
+- POST /api/update-settings  
+- GET /api/get-ai-profile  
+- GET /api/get-last-casts  
+
+Worker:
+
+- Cron every 3–5 minutes  
+- Fetch AI profiles  
+- Generate casts  
+- Publish via Neynar  
+
+### 4.3. Databases (Postgres)
+Tables:
+
+**users**
+- id  
+- user_fid  
+- created_at  
+
+**ai_profiles**
+- id  
+- owner_fid  
+- ai_fid  
+- signer_uuid  
+- avatar_url  
+- username  
+- personality_json  
+- settings_json  
+- autonomy_enabled  
+- created_at  
+
+**posts_log**
+- ai_fid  
+- cast_hash  
+- text  
+- created_at  
+
+---
+
+## 5. External APIs
+
+### OpenAI
+- Chat completions  
+- Future: embeddings  
+
+### Neynar
+- Create account  
+- Register signer  
+- Publish casts  
+- Read mentions  
+
+---
+
+## 6. V1 Out-of-Scope
+- Onchain trading  
+- Multi-pet support  
+- AI-to-AI interactions  
+- Revenue sharing  
+- Advanced moderation  
+
+---
+
+## 7. Deliverables for Claude
+
+1. Rename folder:  
+   `examples/sign-in-test → examples/ai-pet`
+
+2. Implement frontend pages  
+3. Implement backend endpoints  
+4. Integrate OpenAI  
+5. Integrate Neynar  
+6. UI polish  
+7. Environment variables:  
+   - NEYNAR_API_KEY  
+   - OPENAI_API_KEY  
+   - APP_BACKEND_URL  
+
+---
+
+## 8. MVP Definition
+
+- User logs in  
+- User chats with the AI  
+- User creates public AI profile  
+- User configures personality  
+- Backend posts at least 1 autonomous cast  
+- User can pause/unpause  
+- Mini-app shows recent posts  
+
+**V1 complete when these are validated.**
